@@ -1,31 +1,106 @@
-/**
- * Blink
- *
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
-#include "Arduino.h"
+// A non-blocking everyday NeoPixel strip test program.
 
-// Set LED_BUILTIN if it is not defined by Arduino framework
-// #define LED_BUILTIN 13
+// NEOPIXEL BEST PRACTICES for most reliable operation:
+// - Add 1000 uF CAPACITOR between NeoPixel strip's + and - connections.
+// - MINIMIZE WIRING LENGTH between microcontroller board and first pixel.
+// - NeoPixel strip's DATA-IN should pass through a 300-500 OHM RESISTOR.
+// - AVOID connecting NeoPixels on a LIVE CIRCUIT. If you must, ALWAYS
+//   connect GROUND (-) first, then +, then data.
+// - When using a 3.3V microcontroller with a 5V-powered NeoPixel strip,
+//   a LOGIC-LEVEL CONVERTER on the data line is STRONGLY RECOMMENDED.
+// (Skipping these may work OK on your workbench but can fail in the field)
 
+#include <Adafruit_NeoPixel.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <chrono>
+#include <thread>
+
+#ifdef __AVR__
+#include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
+
+// Which pin on the Arduino is connected to the NeoPixels?
+// On a Trinket or Gemma we suggest changing this to 1:
+#ifdef ESP32
+// Cannot use 6 as output for ESP. Pins 6-11 are connected to SPI flash. Use 16 instead.
+#define LED_PIN 4
+#else
+#define LED_PIN 6
+#endif
+
+// How many NeoPixels are attached to the Arduino?
+#define LED_COUNT 50
+uint16_t FRAMERATE = 50;
+
+// Declare our NeoPixel strip object:
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// Replace with your network credentials
+const char *ssid = "ESP32-Light-Server";
+const char *password = "adminLukas";
+const char *serverName = "http://192.168.4.2:8001/api/show/getCurrentBoard";
+WiFiClient client;
+HTTPClient http;
+
+// setup() function -- runs once at startup --------------------------------
 void setup()
 {
-  // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
+  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  strip.show();            // Turn OFF all pixels ASAP
+  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+  WiFi.softAP(ssid, password);
+  // Send request
+  http.addHeader("Content-Type", "application/json");
+  http.begin(client, serverName);
 }
 
+// loop() function -- runs repeatedly as long as board is on ---------------
 void loop()
 {
-  // turn the LED on (HIGH is the voltage level)
-  digitalWrite(LED_BUILTIN, HIGH);
+  http.POST("");
 
-  // wait for a second
-  delay(1000);
+  // Parse response
+  DynamicJsonDocument doc(2048);
+  deserializeJson(doc, http.getStream());
 
-  // turn the LED off by making the voltage LOW
-  digitalWrite(LED_BUILTIN, LOW);
+  strip.clear();
+  for (int i = 0; i < LED_COUNT; i++)
+  {
+    String colorName = doc["boardInfo"]["board"][i]["color"].as<String>();
 
-  // wait for a second
-  delay(1000);
+    if (colorName == "WHITE")
+    {
+      strip.setPixelColor(i, 255, 255, 255);
+    }
+    else if (colorName == "GREEN")
+    {
+      strip.setPixelColor(i, 186, 128, 36);
+    }
+    else if (colorName == "COLOR1")
+    {
+      strip.setPixelColor(i, 255, 255, 0);
+    }
+    else if (colorName == "COLOR2")
+    {
+      strip.setPixelColor(i, 255, 0, 255);
+    }
+    else if (colorName == "COLOR3")
+    {
+      strip.setPixelColor(i, 0, 255, 255);
+    }
+    else if (colorName == "COLOR4")
+    {
+      strip.setPixelColor(i, 0, 0, 255);
+    }
+  }
+
+  strip.show();
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FRAMERATE));
+
+  // Disconnect
+  http.end();
 }
