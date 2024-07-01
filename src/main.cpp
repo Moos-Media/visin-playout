@@ -72,6 +72,8 @@ void loop()
   {
     String colorName = doc["boardInfo"]["board"][i]["color"].as<String>();
 
+    // Conected LEDs in demonstration unit is wired wrongly.
+    // All Colors are sent as GRB instead of RGB.
     if (colorName == "WHITE")
     {
       strip.setPixelColor(i, 255, 255, 255);
@@ -82,19 +84,27 @@ void loop()
     }
     else if (colorName == "COLOR1")
     {
-      strip.setPixelColor(i, 255, 255, 0);
+      strip.setPixelColor(i, 107, 24, 162);
     }
     else if (colorName == "COLOR2")
     {
-      strip.setPixelColor(i, 255, 0, 255);
+      strip.setPixelColor(i, 17, 192, 17);
     }
     else if (colorName == "COLOR3")
     {
-      strip.setPixelColor(i, 0, 255, 255);
+      strip.setPixelColor(i, 178, 223, 52);
     }
     else if (colorName == "COLOR4")
     {
-      strip.setPixelColor(i, 0, 0, 255);
+      strip.setPixelColor(i, 49, 216, 127);
+    }
+    else if (colorName == "COLOR5")
+    {
+      strip.setPixelColor(i, 102, 230, 47);
+    }
+    else if (colorName == "COLOR6")
+    {
+      strip.setPixelColor(i, 0, 184, 172);
     }
   }
 
