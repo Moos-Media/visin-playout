@@ -108,7 +108,7 @@ void loop()
       }
       else if (colorName == "COLOR6")
       {
-        strip.setPixelColor(i, 0, 184, 172);
+        strip.setPixelColor(i, 184, 0, 172);
       }
     }
 
