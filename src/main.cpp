@@ -38,10 +38,10 @@ uint16_t FRAMERATE = 50;
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Replace with your network credentials
-const char *ssid = "ESP32-Light-Server";
-const char *password = "adminLukas";
-const char *serverName = "http://192.168.4.2:8001/api/show/getCurrentBoard";
-const char *brightnessURL = "http://192.168.4.2:8001/api/show/getBrightness";
+const char *ssid = "viergewinnt";
+const char *password = "viergewinnt24";
+const char *serverName = "http://192.168.222.1:8001/api/show/getCurrentBoard";
+const char *brightnessURL = "http://192.168.222.1:8001/api/show/getBrightness";
 WiFiClient client;
 HTTPClient http;
 int frameCounter = 0;
@@ -54,7 +54,7 @@ void setup()
   strip.show();             // Turn OFF all pixels ASAP
   strip.setBrightness(255); // Set BRIGHTNESS to about 1/5 (max = 255)
 
-  WiFi.softAP(ssid, password);
+  WiFi.begin(ssid, password);
   // Send request
   http.addHeader("Content-Type", "application/json");
   http.begin(client, serverName);
