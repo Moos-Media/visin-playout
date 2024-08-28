@@ -76,8 +76,8 @@ void loop()
     {
       String colorName = doc["boardInfo"]["board"][i]["color"].as<String>();
 
-      // Conected LEDs in demonstration unit is wired wrongly.
-      // All Colors are sent as GRB instead of RGB.
+      // Conected LED stripe in demonstration unit is wired wrongly.
+      // All Colors need to be sent as GRB instead of RGB.
       if (colorName == "WHITE")
       {
         strip.setPixelColor(i, 255, 255, 255);
@@ -121,6 +121,7 @@ void loop()
 
   frameCounter += 1;
 
+  // Request Brightness every 200 frames (about 4 secs)
   if (frameCounter > 200)
   {
     // End old connection
@@ -142,6 +143,7 @@ void loop()
       strip.setBrightness(newBrightness);
     }
 
+    // Reconnect to game host
     http.end();
     http.begin(client, serverName);
   }
